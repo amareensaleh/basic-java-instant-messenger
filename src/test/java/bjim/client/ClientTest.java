@@ -1,89 +1,159 @@
 package bjim.client;
 
-import bjim.server.Server;
-import org.junit.Assert;
-import org.junit.Test;
-
 import static bjim.client.Client.LOCAL_HOST;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import bjim.server.Server;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 public class ClientTest {
 
-	@Test
-	public void isClientConnected() throws InterruptedException {
+    private static final int WAIT_SECS = 100;
+    Server server = new Server();
 
-		// given
-		Server server = new Server();
-		Client client = new Client();
-		server.startRunning();
-		Thread.sleep(1000);
-		client.startRunning();
-		Thread.sleep(1000);
+    @Before
+    public void setUp() {
+        server.startRunning();
+    }
 
-		// when
-		boolean clientConnected = server.isClientConnected();
+    @After
+    public void tearDown() {
+        server.stopRunning();
+    }
 
-		// then
-		Assert.assertTrue(clientConnected);
+    @Test
+    public void numberOfConnectedClientsIsOne() throws InterruptedException {
 
-		// after
-		server.stopServer();
-		client.stopClient();
-	}
+        // given
+        Client client = new Client();
+        Thread.sleep(WAIT_SECS);
+        client.startRunning();
+        Thread.sleep(WAIT_SECS);
 
-	@Test
-	public void serverIPIsLocalHostByDefault() {
+        // when...then
+        assertEquals(1, server.numberOfClientsConnected());
 
-		// given
-		Client client = new Client();
+        // after
+        client.stopRunning();
+    }
 
-		// whe
-		String serverIP = client.getServerIP();
+    @Test
+    public void serverIPIsLocalHostByDefault() {
 
-		Assert.assertEquals(LOCAL_HOST, serverIP);
-	}
+        // given
+        Client client = new Client();
 
-	@Test
-	public void windowIsVisibleDuringStartTheClient() throws InterruptedException
-	{
+        // when
+        String serverIP = client.getServerIP();
 
-		// given
-		Server server = new Server();
-		Client client = new Client("127.0.0.1");
-		server.startRunning();
-		Thread.sleep(1000);
-		client.startRunning();
-		Thread.sleep(1000);
+        // then
+        assertEquals(LOCAL_HOST, serverIP);
+    }
 
-		assertTrue(client.isWindowVisibleClientSide());
+    @Test
+    public void windowIsVisibleDuringStartTheClient() throws InterruptedException {
 
-		// after
-		client.stopClient();
-		server.stopServer();
-	}
+        // given
+        Client client = new Client("127.0.0.1");
+        Thread.sleep(WAIT_SECS);
+        client.startRunning();
+        Thread.sleep(WAIT_SECS);
 
+        // when...then
+        assertTrue(client.isWindowVisibleClientSide());
 
-	@Test
-	public void clientSendsAMessageAndServerReceivesIt() throws InterruptedException {
+        // after
+        client.stopRunning();
+    }
 
-		// given
-		Server server = new Server();
-		Client client = new Client("127.0.0.1");
-		server.startRunning();
-		Thread.sleep(1000);
-		client.startRunning();
-		Thread.sleep(1000);
+    @Test
+    public void clientSendsAMessageAndServerReceivesIt() throws InterruptedException {
 
-		//when
-		client.sendMessage("hi");
+        // given
+        Client client = new Client("127.0.0.1");
+        Thread.sleep(WAIT_SECS);
+        client.startRunning();
+        Thread.sleep(WAIT_SECS);
 
-		// then
-		Thread.sleep(500);
-		assertEquals("USER - hi", server.getLastReceivedMessage());
+        // when
+        client.sendMessage("hi");
 
-		//after
-		client.stopClient();
-		server.stopServer();
-	}
+        // then
+        Thread.sleep(WAIT_SECS);
+        assertEquals("USER - hi", server.getLastReceivedMessage());
+
+        // after
+        client.stopRunning();
+    }
+
+    @Test
+    public void multipleClientsConnected() throws InterruptedException {
+
+        // given
+        Client client1 = new Client();
+        Client client2 = new Client();
+
+        // when
+        client1.startRunning();
+        client2.startRunning();
+        Thread.sleep(WAIT_SECS);
+
+        // then
+        assertTrue(client1.isConnected());
+        assertTrue(client2.isConnected());
+
+        // after
+        client1.stopRunning();
+        client2.stopRunning();
+    }
+
+    @Test
+    public void twoClientsSendMessagesToServer() throws InterruptedException {
+
+        // given
+        Client client1 = new Client();
+        Client client2 = new Client();
+        client1.startRunning();
+        client2.startRunning();
+        Thread.sleep(WAIT_SECS);
+
+        // when...then
+        client1.sendMessage("hi");
+        Thread.sleep(WAIT_SECS);
+        assertEquals("USER - hi", server.getLastReceivedMessage());
+
+        client2.sendMessage("hello");
+        Thread.sleep(WAIT_SECS);
+        assertEquals("USER - hello", server.getLastReceivedMessage());
+
+        // after
+        client1.stopRunning();
+        client2.stopRunning();
+    }
+
+    @Test
+    public void serverSendsMessagesToTwoClients() throws InterruptedException {
+
+        // given
+        Client client1 = new Client();
+        Client client2 = new Client();
+        client1.startRunning();
+        client2.startRunning();
+        Thread.sleep(WAIT_SECS);
+
+        // when
+        server.sendMessage("hi");
+
+        // then
+        Thread.sleep(WAIT_SECS);
+        assertEquals("ADMIN- hi", client1.getLastReceivedMessage());
+        assertEquals("ADMIN- hi", client2.getLastReceivedMessage());
+
+        // after
+        client1.stopRunning();
+        client2.stopRunning();
+    }
 }

@@ -1,6 +1,5 @@
 package bjim.client;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,179 +11,183 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.swing.*;
 
 public class Client {
 
-	public static final String LOCAL_HOST = "127.0.0.1";
+    public static final String LOCAL_HOST = "127.0.0.1";
 
-	// client input/output channels
-	private ObjectOutputStream output;
-	private ObjectInputStream input;
+    private String serverIP;
 
-	private String serverIP;
+    private Socket clientSocket;
+    private ObjectOutputStream output;
+    private ObjectInputStream input;
 
-	// the socket where the client is connected
-	private Socket clientSocket;
+    // Chat attributes
+    private JFrame chatWindow;
+    private JTextField userMessage;
+    private JTextArea chatBox;
+    private String lastReceivedMessage = "";
 
-	// Chat attributes
-	private JFrame chatWindow;
-	private JTextField userMessage;
-	private JTextArea chatBox;
-	private String lastReceivedMessage = "";
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-	private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    public Client() {
+        this(LOCAL_HOST);
+    }
 
-	public boolean windowVisible;
+    public Client(String host) {
+        serverIP = host;
+        userMessage = new JTextField();
+        userMessage.setEditable(false);
+        userMessage.addActionListener(
+                new ActionListener() {
 
-	public Client() {
-		this(LOCAL_HOST);
-	}
+                    public void actionPerformed(ActionEvent event) {
+                        sendMessage(event.getActionCommand());
+                        userMessage.setText("");
+                    }
+                });
 
-	public Client(String host) {
-		serverIP = host;
-		userMessage = new JTextField();
-		userMessage.setEditable(false);
-		userMessage.addActionListener(new ActionListener() {
+        chatWindow = new JFrame("Client!");
+        chatWindow.add(userMessage, BorderLayout.NORTH);
+        chatBox = new JTextArea();
+        chatWindow.add(new JScrollPane(chatBox), BorderLayout.CENTER);
+        chatWindow.setSize(300, 180);
+        chatWindow.setVisible(true);
+    }
 
-			public void actionPerformed(ActionEvent event) {
-				sendMessage(event.getActionCommand());
-				userMessage.setText("");
+    public boolean isWindowVisibleClientSide() {
+        return chatWindow.isVisible();
+    }
 
-			}
-		});
+    public void startRunning() {
 
-		chatWindow = new JFrame("Client!");
-		chatWindow.add(userMessage, BorderLayout.NORTH);
-		chatBox = new JTextArea();
-		chatWindow.add(new JScrollPane(chatBox), BorderLayout.CENTER);
-		chatWindow.setSize(300, 180);
-		chatWindow.setVisible(true);
-		windowVisible = chatWindow.isVisible();
-	}
+        executorService.submit(
+                new Runnable() {
 
-	public boolean isWindowVisibleClientSide() {
-		return windowVisible;
-	}
+                    @Override
+                    public void run() {
+                        try {
+                            connectToServer();
+                            setupStreams();
+                            whileChatting();
+                        } catch (EOFException eofException) {
+                            showMessage("\n Client terminated the connection");
 
-	public void startRunning() {
+                        } catch (IOException ioException) {
+                            System.out.println("Stopping client: " + ioException.getMessage());
+                        } finally {
+                            disconnect();
+                        }
+                    }
+                });
+    }
 
-		executorService.submit(new Runnable() {
+    public String getLastReceivedMessage() {
+        return lastReceivedMessage;
+    }
 
-			@Override
-			public void run() {
-				try {
-					connectToServer();
-					setupStreams();
-					whileChatting();
-				} catch (EOFException eofException) {
-					showMessage("\n Client terminated the connection");
+    private void connectToServer() throws IOException {
+        showMessage("Attempting connection");
+        clientSocket = new Socket(InetAddress.getByName(serverIP), 6789);
+        showMessage("\nConnected to: " + clientSocket.getInetAddress().getHostName());
+    }
 
-				} catch (IOException ioException) {
-					System.out.println("Stopping client: " + ioException.getMessage());
-				} finally {
-					closeCrap();
-				}
-			}
-		});
-	}
+    private void setupStreams() throws IOException {
+        output = new ObjectOutputStream(clientSocket.getOutputStream());
+        output.flush();
+        input = new ObjectInputStream(clientSocket.getInputStream());
+        showMessage("\nStreams are now good to go!");
+    }
 
-	public String getLastReceivedMessage() {
-		return lastReceivedMessage;
-	}
+    private void whileChatting() throws IOException {
+        ableToType(true);
+        do {
+            try {
+                lastReceivedMessage = String.valueOf(input.readObject());
+                showMessage("\n" + lastReceivedMessage);
 
-	private void connectToServer() throws IOException {
-		showMessage("Attempting connection");
-		clientSocket = new Socket(InetAddress.getByName(serverIP), 6789);
-		showMessage("\nConnected to" + clientSocket.getInetAddress()
-				.getHostName());
+            } catch (ClassNotFoundException classNotFoundException) {
+                showMessage("\nDont know ObjectType!");
+            }
+        } while (!lastReceivedMessage.equals("\nADMIN - END"));
+    }
 
-	}
+    private void disconnect() {
+        showMessage("\nClosing down!");
+        ableToType(false);
+        try {
+            if (output != null) {
+                output.close();
+            }
+            if (input != null) {
+                input.close();
+            }
+            if (clientSocket != null) {
+                clientSocket.close();
+            }
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
 
-	private void setupStreams() throws IOException {
-		output = new ObjectOutputStream(clientSocket.getOutputStream());
-		output.flush();
-		input = new ObjectInputStream(clientSocket.getInputStream());
-		showMessage("\nStreams are now good to go!");
+    public void stopRunning() {
+        System.out.println("Stopping client...");
+        while (clientSocket != null && !clientSocket.isClosed()) {
+            try {
+                clientSocket.close();
+                return;
+            } catch (IOException e) {
+                System.out.println("Failed to stop client...");
+            }
+        }
+    }
 
-	}
+    public void sendMessage(String message) {
 
-	private void whileChatting() throws IOException {
-		ableToType(true);
-		do {
-			try {
-				lastReceivedMessage = String.valueOf(input.readObject());
-				showMessage("\n" + lastReceivedMessage);
+        if (output == null) {
+            return;
+        }
 
-			} catch (ClassNotFoundException classNotFoundException) {
-				showMessage("\nDont know ObjectType!");
-			}
-		} while (!lastReceivedMessage.equals("\nADMIN - END"));
-	}
+        try {
+            String messageToSend = "USER - " + message;
+            output.writeObject(messageToSend);
+            output.flush();
+            showMessage("\n" + messageToSend);
+        } catch (IOException ioException) {
+            chatBox.append("\nSomething is messed up!");
+        }
+    }
 
-	private void closeCrap() {
-		showMessage("\nClosing down!");
-		ableToType(false);
-		try {
-			if (output != null) {
-				output.close();
-			}
-			if (input != null) {
-				input.close();
-			}
-			if (clientSocket != null) {
-				clientSocket.close();
-			}
-		} catch (IOException ioException) {
-			ioException.printStackTrace();
-		}
-	}
+    private void showMessage(final String m) {
+        SwingUtilities.invokeLater(
+                new Runnable() {
 
-	public void stopClient() {
-		System.out.println("Stopping client...");
-		while (!clientSocket.isClosed()) {
-			try {
-				clientSocket.close();
-				return;
-			} catch (IOException e) {
-				System.out.println("Failed to stop client...");
-			}
-		}
-	}
+                    public void run() {
+                        chatBox.append(m);
+                    }
+                });
+    }
 
-	public void sendMessage(String message) {
-		try {
-			output.writeObject("USER - " + message);
-			output.flush();
-			showMessage("\nUSER - " + message);
-		} catch (IOException ioException) {
-			chatBox.append("\nSomething is messed up!");
-		}
+    private void ableToType(final boolean tof) {
+        SwingUtilities.invokeLater(
+                new Runnable() {
 
-	}
+                    public void run() {
+                        userMessage.setEditable(tof);
+                    }
+                });
+    }
 
-	private void showMessage(final String m) {
-		SwingUtilities.invokeLater(new Runnable() {
+    public void setDefaultCloseOperation(int exitOnClose) {
+        chatWindow.setDefaultCloseOperation(exitOnClose);
+    }
 
-			public void run() {
-				chatBox.append(m);
-			}
-		});
-	}
+    public String getServerIP() {
+        return serverIP;
+    }
 
-	private void ableToType(final boolean tof) {
-		SwingUtilities.invokeLater(new Runnable() {
-
-			public void run() {
-				userMessage.setEditable(tof);
-			}
-		});
-	}
-
-	public void setDefaultCloseOperation(int exitOnClose) {
-		chatWindow.setDefaultCloseOperation(exitOnClose);
-	}
-
-	public String getServerIP() {
-		return serverIP;
-	}
+    public boolean isConnected() {
+        return clientSocket != null && clientSocket.isConnected();
+    }
 }

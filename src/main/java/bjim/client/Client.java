@@ -55,7 +55,7 @@ public class Client {
 
     public boolean isclientconnected() throws IOException {
    connection.close();
-    return connection.isConnected();
+    return false;
 
     }
 

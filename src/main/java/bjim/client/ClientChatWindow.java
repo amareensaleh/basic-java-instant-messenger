@@ -12,4 +12,5 @@ public class ClientChatWindow extends AbstractChatWindow {
         super(username);
     }
 
+
 }

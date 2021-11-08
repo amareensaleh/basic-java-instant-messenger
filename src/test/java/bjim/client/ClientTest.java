@@ -1,8 +1,7 @@
 package bjim.client;
 
 import static bjim.client.Client.LOCAL_HOST;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -174,7 +173,7 @@ public class ClientTest {
 
 
 
-        assertEquals(0,client1.isclientconnected());
+        assertFalse(client1.isclientconnected());
 
         // then
         client1.stopRunning();

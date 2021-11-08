@@ -11,6 +11,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+
 public class ClientTest {
 
     private static final int WAIT_SECS = 100;
@@ -163,17 +165,18 @@ public class ClientTest {
 
 
     @Test
-    public void ClientAppDoNotGetConnectionIfServerAppDonotStarts() throws InterruptedException {
+    public void ClientAppDoNotGetConnectionIfServerAppDonotStarts() throws InterruptedException, IOException {
 
         // given
         Client client = new Client(clientChatWindow);
 
         client.startRunning();
+        Thread.sleep(WAIT_SECS);
         // when
 
 
 
-       assertTrue(client.isclientdisconnected());
+       assertFalse(client.isclientconnected());
 
         // then
         client.stopRunning();

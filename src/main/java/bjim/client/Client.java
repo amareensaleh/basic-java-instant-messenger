@@ -53,8 +53,9 @@ public class Client {
         return chatWindow.isVisible();
     }
 
-    public boolean isclientdisconnected() {
-   return connection.isClosed();
+    public boolean isclientconnected() throws IOException {
+   connection.close();
+    return connection.isConnected();
 
     }
 

@@ -202,7 +202,7 @@ public class ServerTest {
         // when
 
         //then
-        
+
         assertFalse(server.abletowrite());
 
 
@@ -215,6 +215,35 @@ public class ServerTest {
 
 
     }
+
+
+
+    @Test
+    public void ServerCannotWriteIfServerappStartsAfterClientappStarts() throws InterruptedException {
+
+        // given
+        when(clientChatWindow.isVisible()).thenReturn(true);
+        when(serverChatWindow.isVisible()).thenReturn(true);
+
+
+
+//then
+
+        assertFalse(server.abletowrite());
+
+
+        // after
+
+        server.stopRunning();
+
+
+
+
+
+
+
+    }
+
 
 
 

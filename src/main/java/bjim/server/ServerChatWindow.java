@@ -19,7 +19,14 @@ public class ServerChatWindow extends AbstractChatWindow {
         return userInput.isVisible();
     }
     public boolean abletowrite() {
-        return false;
+        userInput.setEditable(false);
+        if(userInput.isEditable()==true)
+            return true;
+        else return false;
+    }
+    public String welcomemesaage()
+    {chatText.setText("Waiting for someone to connect!");
+        return chatText.getText();
     }
 
 

@@ -176,6 +176,51 @@ public class ServerTest {
     }
 
 
+
+    public void server_send_wlcome_message() throws InterruptedException
+    {    //given
+        when(serverChatWindow.isVisible()).thenReturn(true);
+
+        //then
+
+        assertEquals("Waiting for someone to connect!", server.gettext());
+        //after
+        server.stopRunning();
+
+    }
+
+
+
+    @Test
+    public void ServerCannotWriteIfClientIsNotConnected() throws InterruptedException
+    {
+
+        // given
+
+        Server server = new Server();
+        Client client = new Client("127.0.0.1");
+
+        // when
+        server.startRunning();
+
+        //then
+        Thread.sleep(6000);
+        assertFalse(server.abletowrite());
+
+
+
+        // after
+
+        server.stopRunning();
+
+
+
+
+    }
+
+
+
+
 }
 
 //make a comment

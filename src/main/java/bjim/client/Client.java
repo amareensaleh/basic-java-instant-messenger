@@ -16,7 +16,7 @@ public class Client {
     private final ClientChatWindow chatWindow;
     private final String serverIP;
     private final int serverPort = SERVER_PORT; // todo: allow setting in constructor
-
+int checkstatus;
     private Connection connection;
 
     private String lastReceivedMessage = "";
@@ -53,11 +53,23 @@ public class Client {
         return chatWindow.isVisible();
     }
 
-    public boolean isclientconnected() throws IOException {
-   connection.close();
-    return false;
+    public void checkconnection() throws IOException {
+        try{if (connection.isClosed() ) {
+            checkstatus=0;
+        }
+        else  checkstatus=1;}
+        catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
+    public int running()
+    {
+        if (checkstatus==1)
+            return 1;
+        else return 0;
+    }
+
 
 
     public void startRunning() {

@@ -6,18 +6,15 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import bjim.common.Connection;
 import bjim.server.Server;
 import bjim.server.ServerChatWindow;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-
 public class ClientTest {
 
-    private static final int WAIT_SECS = 1000;
+    private static final int WAIT_SECS = 100;
 
     final ServerChatWindow serverChatWindow = mock(ServerChatWindow.class);
     final ClientChatWindow clientChatWindow = mock(ClientChatWindow.class);
@@ -36,9 +33,8 @@ public class ClientTest {
     }
 
     @After
-    public void tearDown() throws InterruptedException {
+    public void tearDown() {
         server.stopRunning();
-        Thread.sleep(WAIT_SECS);
     }
 
     @Test
@@ -87,12 +83,11 @@ public class ClientTest {
         client.startRunning();
         Thread.sleep(WAIT_SECS);
 
-
         // when
         client.sendMessage("hi");
-        Thread.sleep(WAIT_SECS);
 
         // then
+        Thread.sleep(WAIT_SECS);
         assertEquals("Client:\n  hi", server.getLastReceivedMessage());
 
         // after
@@ -126,10 +121,7 @@ public class ClientTest {
         // given
         Client client1 = new Client(clientChatWindow);
         Client client2 = new Client(clientChatWindow);
-
         client1.startRunning();
-        Thread.sleep(WAIT_SECS);
-
         client2.startRunning();
         Thread.sleep(WAIT_SECS);
 
@@ -169,30 +161,4 @@ public class ClientTest {
         client1.stopRunning();
         client2.stopRunning();
     }
-
-    // requires name to log in as a client
-    
-   // @Test
-   /* public void userRequiretoProvideNameDuringConnection() throws InterruptedException, IOException {
-        // given
-        Client client = new Client(clientChatWindow);
-        //Connection c=new Connection();
-        //client.provideUserName("")
-
-
-        // when
-        client.startRunning();
-        Thread.sleep(WAIT_SECS);
-
-        // then
-        //assertTrue(client.isClosed());
-        assertTrue(client.isConnected());
-
-        //assertTrue(conne);
-
-        // after
-        client.stopRunning();
-        */
-    //}
-
 }

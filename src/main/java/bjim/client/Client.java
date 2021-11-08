@@ -144,7 +144,7 @@ int checkstatus;
         public void run() {
             try {
                 connectToServer();
-              
+                setupStreams();
                 whileChatting();
             } catch (IOException eofException) {
                 setStatus(CONNECTION_CLOSED);

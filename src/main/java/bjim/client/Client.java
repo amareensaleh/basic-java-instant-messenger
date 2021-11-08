@@ -53,8 +53,8 @@ public class Client {
         return chatWindow.isVisible();
     }
 
-    public boolean isclientconnected() {
-         return !connection.isConnected();
+    public boolean isclientdisconnected() {
+   return connection.isClosed();
 
     }
 

@@ -167,13 +167,13 @@ public class ClientTest {
 
         // given
         Client client = new Client(clientChatWindow);
-        when(clientChatWindow.isVisible()).thenReturn(true);
+
         client.startRunning();
         // when
 
 
 
-        assertEquals(0,client.isclientconnected());
+       assertTrue(client.isclientdisconnected());
 
         // then
         client.stopRunning();

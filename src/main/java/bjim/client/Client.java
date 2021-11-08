@@ -54,10 +54,10 @@ int checkstatus;
     }
 
     public void checkconnection() throws IOException {
-        try{if (connection.isClosed() ) {
-            checkstatus=0;
+        try{if (connection.isConnected() ) {
+            checkstatus=1;
         }
-        else  checkstatus=1;}
+        else  checkstatus=0;}
         catch (Exception e) {
             e.printStackTrace();
         }

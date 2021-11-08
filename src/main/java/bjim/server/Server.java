@@ -52,6 +52,8 @@ public class Server {
     public boolean isServerMessageVisible() {
         return chatWindow.isUserMessageVisible();
     }
+    public boolean abletowrite(){return chatWindow.abletowrite();}
+
 
     public void startRunning() {
 
@@ -197,5 +199,9 @@ public class Server {
                         "Error while attempting to close client connection: " + e.getMessage());
             }
         }
+
+
+
+
     }
 }

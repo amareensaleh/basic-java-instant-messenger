@@ -197,14 +197,12 @@ public class ServerTest {
 
         // given
 
-        Server server = new Server();
-        Client client = new Client("127.0.0.1");
+        when(serverChatWindow.isVisible()).thenReturn(true);
 
         // when
-        server.startRunning();
 
         //then
-        Thread.sleep(6000);
+        
         assertFalse(server.abletowrite());
 
 

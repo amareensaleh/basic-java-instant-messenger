@@ -22,4 +22,5 @@ public class ServerChatWindow extends AbstractChatWindow {
         return false;
     }
 
+
 }

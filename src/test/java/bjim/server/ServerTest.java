@@ -14,6 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
+
 
 public class ServerTest {
 
@@ -22,6 +24,7 @@ public class ServerTest {
     private static final int CUSTOM_PORT = 1234;
 
     final ServerChatWindow serverChatWindow = mock(ServerChatWindow.class);
+    final ClientChatWindow clientChatWindow = mock(ClientChatWindow.class);
 
     Server server = new Server(serverChatWindow);
 
@@ -154,6 +157,25 @@ public class ServerTest {
         // after
         server.stopRunning();
     }
+
+
+    @Test
+    public void server_accept_client_request_to_connect() throws InterruptedException, IOException {
+
+        // given
+
+        when(serverChatWindow.isVisible()).thenReturn(true);
+        when(clientChatWindow.isVisible()).thenReturn(true);
+
+
+        // then
+
+        assertTrue(server.serversocketcondition());
+        // after
+        server.stopRunning();
+    }
+
+
 }
 
 //make a comment

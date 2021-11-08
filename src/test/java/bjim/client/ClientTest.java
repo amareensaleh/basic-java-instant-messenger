@@ -161,4 +161,13 @@ public class ClientTest {
         client1.stopRunning();
         client2.stopRunning();
     }
+
+    @Test
+    public void testingtravis() throws InterruptedException {
+
+       String m="hi";
+       assertEquals("hi",m);
+    }
+
+
 }

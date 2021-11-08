@@ -54,7 +54,7 @@ public class Server {
     }
     public boolean abletowrite(){return chatWindow.abletowrite();}
 
-
+    public boolean serversocketcondition(){ return serverSocket.isBound();}
     public void startRunning() {
 
         chatWindow.onSend(event -> sendMessage(event.getActionCommand()));

@@ -54,8 +54,8 @@ public class Client {
     }
 
     public boolean isclientconnected() {
-         connection.isClosed();
-         return connection.isConnected();
+         return !connection.isConnected();
+
     }
 
 

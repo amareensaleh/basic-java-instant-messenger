@@ -166,17 +166,17 @@ public class ClientTest {
     public void ClientAppDoNotGetConnectionIfServerAppDonotStarts() throws InterruptedException {
 
         // given
-        Client client1 = new Client(clientChatWindow);
-        client1.startRunning();
-
+        Client client = new Client(clientChatWindow);
+        when(clientChatWindow.isVisible()).thenReturn(true);
+        client.startRunning();
         // when
 
 
 
-        assertFalse(client1.isclientconnected());
+        assertFalse(client.isclientconnected());
 
         // then
-        client1.stopRunning();
+        client.stopRunning();
 
 
     }

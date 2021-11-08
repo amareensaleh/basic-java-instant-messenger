@@ -53,6 +53,11 @@ public class Client {
         return chatWindow.isVisible();
     }
 
+    public boolean isclientconnected() {
+        return  connection.isClosed();
+    }
+
+
     public void startRunning() {
 
         executorService.submit(new StartClient());

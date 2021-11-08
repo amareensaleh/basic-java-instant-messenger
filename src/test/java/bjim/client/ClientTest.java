@@ -162,12 +162,29 @@ public class ClientTest {
         client2.stopRunning();
     }
 
-    @Test
-    public void testingtravis() throws InterruptedException {
 
-       String m="hi";
-       assertEquals("hi",m);
+    @Test
+    public void ClientAppDoNotGetConnectionIfServerAppDonotStarts() throws InterruptedException {
+
+        // given
+        Client client1 = new Client(clientChatWindow);
+        client1.startRunning();
+
+        // when
+
+
+
+        assertEquals(0,client1.isclientconnected());
+
+        // then
+        client1.stopRunning();
+
+
     }
+
+
+
+
 
 
 }

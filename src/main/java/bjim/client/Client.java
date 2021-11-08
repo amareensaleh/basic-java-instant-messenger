@@ -2,6 +2,8 @@ package bjim.client;
 
 import bjim.common.Connection;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -20,6 +22,9 @@ int checkstatus;
     private Connection connection;
 
     private String lastReceivedMessage = "";
+    private ObjectOutputStream output;
+    private ObjectInputStream input;
+
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -124,6 +129,14 @@ int checkstatus;
     public boolean isConnected() {
         return connection != null && connection.isConnected();
     }
+    private void setupStreams() throws IOException {
+        output = new ObjectOutputStream(connection.getOutput());
+        output.flush();
+        input = new ObjectInputStream(connection.getInput());
+        showMessage("\nStreams are now good to go!");
+
+    }
+
 
     private class StartClient implements Runnable {
 
@@ -131,6 +144,7 @@ int checkstatus;
         public void run() {
             try {
                 connectToServer();
+                setupStreams();
                 whileChatting();
             } catch (IOException eofException) {
                 setStatus(CONNECTION_CLOSED);

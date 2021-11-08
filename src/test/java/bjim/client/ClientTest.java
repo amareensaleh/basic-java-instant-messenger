@@ -164,28 +164,7 @@ public class ClientTest {
     }
 
 
-    @Test
-    public void ClientAppDoNotGetConnectionIfServerAppDonotStarts() throws InterruptedException, IOException {
 
-        // given
-        Client client = new Client(clientChatWindow);
-
-        client.startRunning();
-        Thread.sleep(WAIT_SECS);
-        // when
-
-
-        client.checkconnection();
-
-        Thread.sleep(WAIT_SECS);
-        assertEquals(1,client.running());
-
-
-        // then
-        client.stopRunning();
-
-
-    }
 
 
 

@@ -173,7 +173,7 @@ public class ClientTest {
 
 
 
-        assertFalse(client.isclientconnected());
+        assertEquals(0,client.isclientconnected());
 
         // then
         client.stopRunning();

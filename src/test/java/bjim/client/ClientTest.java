@@ -178,7 +178,7 @@ public class ClientTest {
         client.checkconnection();
 
         Thread.sleep(WAIT_SECS);
-        assertEquals(0,client.running());
+        assertEquals(1,client.running());
 
 
         // then

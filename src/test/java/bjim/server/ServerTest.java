@@ -234,8 +234,8 @@ public class ServerTest {
 
     }
 
-
-    public void server_shows_message_after_connection() throws InterruptedException
+    @Test
+    public void server_shows_message_after_connection()
     {    //given
 
         server.startRunning();
@@ -248,14 +248,8 @@ public class ServerTest {
         server.stopRunning();
 
     }
-    @Test
-    public void server_shows_message_after_connection1() 
-    {    //given
 
-       String m="hi";
-       assertEquals("hi",m);
-
-    }
+   
 
 
 

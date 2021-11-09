@@ -189,6 +189,31 @@ public class ClientTest {
     }
 
 
+    @Test
+    public void CLientCanBeAbleToTypeIfClientGetConnectionToServer() throws InterruptedException, IOException {
+        // given
+        Client client1 = new Client(clientChatWindow);
+        client1.startRunning1();
+
+        // when
+
+
+
+
+        assertFalse(client1.checktypingstatus());
+
+
+        // after
+        client1.stopRunning();
+
+
+
+
+
+    }
+
+
+
 
 
 

@@ -24,6 +24,7 @@ int checkstatus;
     private String lastReceivedMessage = "";
     private ObjectOutputStream output;
     private ObjectInputStream input;
+     boolean type;
 
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -58,11 +59,8 @@ int checkstatus;
         return chatWindow.isVisible();
     }
 
-    public int checkconnection() throws IOException {
-        if (connection.isConnected() ) {
-           return 1;
-        }
-        else  return 0;
+    public boolean checktypingstatus() throws IOException {
+       return type;
 
     }
 
@@ -185,6 +183,7 @@ int checkstatus;
 
         private void ableToType(final boolean tof) {
             chatWindow.ableToType(tof);
+            type=tof;
         }
 
         private void setStatus(String text) {

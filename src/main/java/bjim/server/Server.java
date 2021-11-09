@@ -85,7 +85,8 @@ public class Server {
     }
 
     public String getmessage()
-    {  return getstatus;}
+    {  System.out.println(getstatus);
+        return getstatus;}
 
     public void setmessage(String m)
     {
@@ -205,6 +206,7 @@ public class Server {
         public void setStatus(String text) {
             chatWindow.setStatus(text);
             setmessage(text);
+            getmessage();
 
 
         }

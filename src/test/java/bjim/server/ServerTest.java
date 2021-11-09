@@ -235,21 +235,20 @@ public class ServerTest {
     }
 
     @Test
-    public void server_shows_message_after_connection()
-    {    //given
-
+    public void server_shows_message_after_connection() throws InterruptedException {    //given
+        when(serverChatWindow.isVisible()).thenReturn(true);
         server.startRunning();
 
         //then
+        Thread.sleep(5000);
         String actual =  server.getmessage();
-        assertTrue("Waiting for clients to connect!".equals(actual));
-
+        assertEquals("Waiting for clients to connect!",actual);
         //after
         server.stopRunning();
 
     }
 
-   
+
 
 
 

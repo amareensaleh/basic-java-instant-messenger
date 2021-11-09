@@ -176,7 +176,7 @@ public class ServerTest {
     }
 
 
-   
+
 
 
 
@@ -205,6 +205,20 @@ public class ServerTest {
 
     }
 
+    @Test
+
+    public void server_shows_message_after_connection() throws InterruptedException
+    {    //given
+        when(serverChatWindow.isVisible()).thenReturn(true);
+        server.startRunning();
+
+        //then
+        Thread.sleep(1000);
+        assertEquals("Waiting for clients to connect! ", server.getmessage());
+                //after
+                server.stopRunning();
+
+    }
 
 
     @Test

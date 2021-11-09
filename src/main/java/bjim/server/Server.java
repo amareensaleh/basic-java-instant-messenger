@@ -56,16 +56,18 @@ public class Server {
 
     public boolean serversocketcondition(){ return serverSocket.isBound();}
 
-    public String getmessage(){return message;}
+    public String getmessage(){
+        System.out.println(message);
+        return message;}
 
-    public void startRunning() {
+    public void startRunning() throws InterruptedException {
 
         chatWindow.onSend(event -> sendMessage(event.getActionCommand()));
 
         serverThreadPool.submit(new StartServer());
 
-
-
+Thread.sleep(500);
+getmessage();
 
     }
 

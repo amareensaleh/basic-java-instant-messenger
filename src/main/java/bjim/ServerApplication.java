@@ -6,7 +6,7 @@ import bjim.server.Server;
 
 public class ServerApplication {
 
-    public static void main(String[] args)  {
+    public static void main(String[] args) throws InterruptedException {
         Server server = new Server();
         server.setDefaultCloseOperation(EXIT_ON_CLOSE);
         server.startRunning();

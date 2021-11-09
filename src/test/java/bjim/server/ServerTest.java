@@ -214,7 +214,7 @@ public class ServerTest {
 
         //then
         Thread.sleep(4000);
-        assertEquals("Waiting for clients to connect! ", server.getmessage());
+        assertEquals(null, server.getmessage());
                 //after
                 server.stopRunning();
 

@@ -56,7 +56,7 @@ public class Server {
 
     public boolean serversocketcondition(){ return serverSocket.isBound();}
 
-    public String gettext(){return message;}
+    public String getmessage(){return message;}
 
     public void startRunning() {
 

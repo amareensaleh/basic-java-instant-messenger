@@ -185,7 +185,7 @@ public class ServerTest {
 
         //then
         Thread.sleep(WAIT_SECS);
-        assertEquals("Waiting for someone to connect!", server.gettext());
+        assertEquals("Waiting for someone to connect!", server.getmessage());
         //after
         server.stopRunning();
 

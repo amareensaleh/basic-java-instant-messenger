@@ -56,7 +56,7 @@ public class Server {
 
     public boolean serversocketcondition(){ return serverSocket.isBound();}
 
-    public String gettext(){return chatWindow.welcomemesaage1();}
+    public String gettext(){return chatWindow.getStatus();}
 
     public void startRunning() {
 
@@ -186,7 +186,7 @@ public class Server {
             }
         }
 
-        private void setStatus(String text) {
+        public void setStatus(String text) {
             chatWindow.setStatus(text);
         }
 

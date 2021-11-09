@@ -85,7 +85,8 @@ public class Server {
     }
 
     public String getmessage()
-    {return getstatus;}
+    {String m="hi";
+    return m;}
 
     public void setmessage(String m)
     {
@@ -204,7 +205,7 @@ public class Server {
 
         public void setStatus(String text) {
             chatWindow.setStatus(text);
-           setmessage(text);
+
 
         }
 

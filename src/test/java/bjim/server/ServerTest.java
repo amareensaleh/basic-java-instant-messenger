@@ -176,13 +176,15 @@ public class ServerTest {
     }
 
 
+    @Test
 
-    public void server_send_wlcome_message() throws InterruptedException
+    public void server_shows_message_after_connection() throws InterruptedException
     {    //given
         when(serverChatWindow.isVisible()).thenReturn(true);
+        server.startRunning();
 
         //then
-
+        Thread.sleep(WAIT_SECS);
         assertEquals("Waiting for someone to connect!", server.gettext());
         //after
         server.stopRunning();

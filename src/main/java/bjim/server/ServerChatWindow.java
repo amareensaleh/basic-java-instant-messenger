@@ -28,6 +28,10 @@ public class ServerChatWindow extends AbstractChatWindow {
     {chatText.setText("Waiting for someone to connect!");
         return chatText.getText();
     }
+    public String welcomemesaage1()
+    {chatText.setText("Waiting for someone to connect!");
+        return status.getText();
+    }
 
 
 }

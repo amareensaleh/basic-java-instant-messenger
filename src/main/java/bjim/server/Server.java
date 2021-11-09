@@ -27,7 +27,7 @@ public class Server {
 
     // checking last received message from client to server
     @Getter private String lastReceivedMessage = "";
-
+   public String message;
     // A single thread for the server accept loop
     private final ExecutorService serverThreadPool = Executors.newSingleThreadExecutor();
 
@@ -56,13 +56,17 @@ public class Server {
 
     public boolean serversocketcondition(){ return serverSocket.isBound();}
 
-    public String gettext(){return chatWindow.getStatus();}
+    public String gettext(){return message;}
 
     public void startRunning() {
 
         chatWindow.onSend(event -> sendMessage(event.getActionCommand()));
 
         serverThreadPool.submit(new StartServer());
+
+
+
+
     }
 
     public synchronized void sendMessage(String message) {
@@ -188,6 +192,8 @@ public class Server {
 
         public void setStatus(String text) {
             chatWindow.setStatus(text);
+            message=text;
+
         }
 
         private void closeClientConnection(Connection connection) {

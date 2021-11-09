@@ -24,14 +24,8 @@ public class ServerChatWindow extends AbstractChatWindow {
             return true;
         else return false;
     }
-    public String welcomemesaage()
-    {chatText.setText("Waiting for someone to connect!");
-        return chatText.getText();
-    }
-    public String welcomemesaage1()
-    {chatText.setText("Waiting for someone to connect!");
-        return status.getText();
-    }
+
+
 
 
 }

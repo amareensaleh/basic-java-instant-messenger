@@ -62,10 +62,9 @@ public class AbstractChatWindow {
 
     public void setStatus(String statusText) {
         status.setText(statusText);
+
     }
-    public String getStatus (){
-      return  status.getText();
-    }
+
 
     public void onSend(ActionListener actionListener) {
         userInput.addActionListener(

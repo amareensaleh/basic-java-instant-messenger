@@ -20,6 +20,7 @@ public class Server {
 
     // the socket where the server is listening
     private ServerSocket serverSocket;
+    private String getstatus;
 
     private final ServerChatWindow chatWindow;
 
@@ -27,7 +28,7 @@ public class Server {
 
     // checking last received message from client to server
     @Getter private String lastReceivedMessage = "";
-   public String message;
+
     // A single thread for the server accept loop
     private final ExecutorService serverThreadPool = Executors.newSingleThreadExecutor();
 
@@ -56,18 +57,16 @@ public class Server {
 
     public boolean serversocketcondition(){ return serverSocket.isBound();}
 
-    public String getmessage(){
-        System.out.println(message);
-        return message;}
 
-    public void startRunning() throws InterruptedException {
 
+    public void startRunning()  {
+        final String message;
         chatWindow.onSend(event -> sendMessage(event.getActionCommand()));
 
         serverThreadPool.submit(new StartServer());
 
-Thread.sleep(500);
-getmessage();
+
+
 
     }
 
@@ -85,6 +84,15 @@ getmessage();
         }
     }
 
+    public String getmessage()
+    {return getstatus;}
+
+    public void setmessage(String m)
+    {
+        getstatus=m;
+    }
+
+
     private void sendMessage(String messageToSend, Connection connection) throws IOException {
         connection.getOutput().writeObject(messageToSend);
         connection.getOutput().flush();
@@ -101,6 +109,7 @@ getmessage();
             }
         }
     }
+
 
     public synchronized void showMessage(String text) {
         chatWindow.showMessage(text);
@@ -175,6 +184,7 @@ getmessage();
             connections.clear();
         }
 
+
         private void readMessages(Connection connection) {
 
             while (connection != null && connection.getInput() != null) {
@@ -194,7 +204,7 @@ getmessage();
 
         public void setStatus(String text) {
             chatWindow.setStatus(text);
-            message=text;
+           setmessage(text);
 
         }
 

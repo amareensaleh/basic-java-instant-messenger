@@ -58,21 +58,28 @@ int checkstatus;
         return chatWindow.isVisible();
     }
 
-    public void checkconnection() throws IOException {
-        try{if (connection.isConnected() ) {
-            checkstatus=1;
+    public boolean checkconnection() throws IOException {
+        if (connection.isConnected() ) {
+           return true;
         }
-        else  checkstatus=0;}
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        else  return false;
 
     }
-    public int running()
-    {
-        if (checkstatus==1)
-            return 1;
-        else return 0;
+
+    public void startclientrunning() {
+        StartClient clientstart=new StartClient();
+        try {
+
+            clientstart.connectToServer();
+            clientstart.setupStreams();
+            clientstart.whileChatting();
+        } catch (IOException eofException) {
+            clientstart.setStatus(CONNECTION_CLOSED);
+        } finally {
+            clientstart .disconnect();
+        }
+
+
     }
 
 
@@ -129,13 +136,31 @@ int checkstatus;
     public boolean isConnected() {
         return connection != null && connection.isConnected();
     }
-    private void setupStreams() throws IOException {
-        output = new ObjectOutputStream(connection.getOutput());
-        output.flush();
-        input = new ObjectInputStream(connection.getInput());
-        showMessage("\nStreams are now good to go!");
 
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     private class StartClient implements Runnable {
@@ -144,7 +169,7 @@ int checkstatus;
         public void run() {
             try {
                 connectToServer();
-                setupStreams();
+
                 whileChatting();
             } catch (IOException eofException) {
                 setStatus(CONNECTION_CLOSED);
@@ -157,6 +182,13 @@ int checkstatus;
             setStatus("Attempting to connect to server @" + serverIP + ":" + serverPort);
             connection = new Connection(new Socket(InetAddress.getByName(serverIP), serverPort));
             setStatus("Connected to server @" + serverIP + ":" + serverPort);
+        }
+        private void setupStreams() throws IOException {
+            output = new ObjectOutputStream(connection.getOutput());
+            output.flush();
+            input = new ObjectInputStream(connection.getInput());
+            showMessage("\nStreams are now good to go!");
+
         }
 
         private void whileChatting() throws IOException {

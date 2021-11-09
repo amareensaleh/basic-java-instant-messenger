@@ -179,8 +179,7 @@ public class ClientTest {
 
 
 
-        assertEquals(0,client1.checkconnection());
-
+        assertTrue(client1.isConnected());
 
 
         // after

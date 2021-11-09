@@ -58,30 +58,19 @@ int checkstatus;
         return chatWindow.isVisible();
     }
 
-    public boolean checkconnection() throws IOException {
+    public int checkconnection() throws IOException {
         if (connection.isConnected() ) {
-           return true;
+           return 1;
         }
-        else  return false;
+        else  return 0;
 
     }
 
-    public void startclientrunning() {
-        StartClient clientstart=new StartClient();
-        try {
 
-            clientstart.connectToServer();
-            clientstart.setupStreams();
-            clientstart.whileChatting();
-        } catch (IOException eofException) {
-            clientstart.setStatus(CONNECTION_CLOSED);
-        } finally {
-            clientstart .disconnect();
-        }
+    public void startRunning1() {
 
-
+        executorService.submit(new StartClient1());
     }
-
 
 
     public void startRunning() {
@@ -141,6 +130,67 @@ int checkstatus;
 
 
 
+    private class StartClient1 implements Runnable {
+
+        @Override
+        public void run() {
+            try {
+                connectToServer();
+                 setupStreams();
+                whileChatting();
+            } catch (IOException eofException) {
+                setStatus(CONNECTION_CLOSED);
+            } finally {
+                disconnect();
+            }
+        }
+
+        private void connectToServer() throws IOException {
+            setStatus("Attempting to connect to server @" + serverIP + ":" + serverPort);
+            connection = new Connection(new Socket(InetAddress.getByName(serverIP), serverPort));
+            setStatus("Connected to server @" + serverIP + ":" + serverPort);
+        }
+        private void setupStreams() throws IOException {
+            output = new ObjectOutputStream(connection.getSocket().getOutputStream());
+            output.flush();
+            input = new ObjectInputStream(connection.getSocket().getInputStream());
+            showMessage("\nStreams are now good to go!");
+
+        }
+
+        private void whileChatting() throws IOException {
+            ableToType(true);
+            do {
+                try {
+                    lastReceivedMessage = String.valueOf(connection.getInput().readObject());
+                    showMessage("\n" + lastReceivedMessage);
+
+                } catch (ClassNotFoundException classNotFoundException) {
+                    showMessage("\nDont know ObjectType!");
+                }
+            } while (!lastReceivedMessage.equals("\nADMIN - END"));
+        }
+
+        private void disconnect() {
+            setStatus(CONNECTION_CLOSED);
+            ableToType(false);
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (IOException e) {
+                setStatus(CONNECTION_CLOSED);
+            }
+        }
+
+        private void ableToType(final boolean tof) {
+            chatWindow.ableToType(tof);
+        }
+
+        private void setStatus(String text) {
+            chatWindow.setStatus(text);
+        }
+    }
 
 
 

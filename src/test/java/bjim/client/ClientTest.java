@@ -171,15 +171,15 @@ public class ClientTest {
 
         // given
         Client client1 = new Client(clientChatWindow);
-        client1.startclientrunning();
+        client1.startRunning1();
 
 
         // when
 
 
-        Thread.sleep(WAIT_SECS);
 
-        assertTrue(client1.checkconnection());
+
+        assertEquals(0,client1.checkconnection());
 
 
 

@@ -179,7 +179,7 @@ public class ClientTest {
 
 
 
-        assertTrue(client1.isConnected());
+        assertFalse(client1.isConnected());
 
 
         // after

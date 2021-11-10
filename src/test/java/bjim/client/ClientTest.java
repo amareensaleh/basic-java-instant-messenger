@@ -6,11 +6,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import bjim.common.Connection;
 import bjim.server.Server;
 import bjim.server.ServerChatWindow;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
 
 public class ClientTest {
 
@@ -83,6 +86,10 @@ public class ClientTest {
         client.startRunning();
         Thread.sleep(WAIT_SECS);
 
+        server.startRunning();
+        Thread.sleep(WAIT_SECS);
+
+
         // when
         client.sendMessage("hi");
 
@@ -90,6 +97,7 @@ public class ClientTest {
         assertEquals("Client:\n  hi", server.getLastReceivedMessage());
 
         // after
+        server.stopRunning();
         client.stopRunning();
     }
 
@@ -160,4 +168,30 @@ public class ClientTest {
         client1.stopRunning();
         client2.stopRunning();
     }
+
+    // requires name to log in as a client
+    
+   // @Test
+   /* public void userRequiretoProvideNameDuringConnection() throws InterruptedException, IOException {
+        // given
+        Client client = new Client(clientChatWindow);
+        //Connection c=new Connection();
+        //client.provideUserName("")
+
+
+        // when
+        client.startRunning();
+        Thread.sleep(WAIT_SECS);
+
+        // then
+        //assertTrue(client.isClosed());
+        assertTrue(client.isConnected());
+
+        //assertTrue(conne);
+
+        // after
+        client.stopRunning();
+        */
+    }
+
 }

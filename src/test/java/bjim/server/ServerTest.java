@@ -94,7 +94,18 @@ public class ServerTest {
         // after
         server.stopRunning();
     }
+     
+    @Test
+    public void checkConnectiontrueforServer() throws InterruptedException {
+        server.startRunning();
+        //then
+        assertTrue(server.isRunning());
 
+        //after
+        server.stopRunning();
+
+    }
+    
     @Test
     public void serverSendsAMessageAndClientReceivesIt() throws InterruptedException {
 

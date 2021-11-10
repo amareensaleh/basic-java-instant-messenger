@@ -86,9 +86,6 @@ public class ClientTest {
         client.startRunning();
         Thread.sleep(WAIT_SECS);
 
-        server.startRunning();
-        Thread.sleep(WAIT_SECS);
-
 
         // when
         client.sendMessage("hi");
@@ -97,7 +94,6 @@ public class ClientTest {
         assertEquals("Client:\n  hi", server.getLastReceivedMessage());
 
         // after
-        server.stopRunning();
         client.stopRunning();
     }
 
@@ -192,6 +188,6 @@ public class ClientTest {
         // after
         client.stopRunning();
         */
-    }
+    //}
 
 }

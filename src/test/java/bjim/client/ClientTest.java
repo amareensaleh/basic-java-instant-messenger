@@ -17,7 +17,7 @@ import java.io.IOException;
 
 public class ClientTest {
 
-    private static final int WAIT_SECS = 500;
+    private static final int WAIT_SECS = 1000;
 
     final ServerChatWindow serverChatWindow = mock(ServerChatWindow.class);
     final ClientChatWindow clientChatWindow = mock(ClientChatWindow.class);
@@ -36,8 +36,9 @@ public class ClientTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws InterruptedException {
         server.stopRunning();
+        Thread.sleep(WAIT_SECS);
     }
 
     @Test
@@ -89,6 +90,7 @@ public class ClientTest {
 
         // when
         client.sendMessage("hi");
+        Thread.sleep(WAIT_SECS);
 
         // then
         assertEquals("Client:\n  hi", server.getLastReceivedMessage());
@@ -124,7 +126,10 @@ public class ClientTest {
         // given
         Client client1 = new Client(clientChatWindow);
         Client client2 = new Client(clientChatWindow);
+
         client1.startRunning();
+        Thread.sleep(WAIT_SECS);
+
         client2.startRunning();
         Thread.sleep(WAIT_SECS);
 

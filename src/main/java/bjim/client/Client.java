@@ -1,5 +1,6 @@
 package bjim.client;
 
+import bjim.common.AbstractWindowForClientName;
 import bjim.common.Connection;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -34,8 +35,18 @@ public class Client {
     }
 
     public Client() {
-        this(new ClientChatWindow());
+       // this(new ClientChatWindow(new AbstractWindowForClientName().getkey()));
+        this(new ClientChatWindow("Jaydeb"));
+        //System.out.println(new AbstractWindowForClientName().getkey());
+
     }
+
+
+    public Client(String name, int val)
+    {
+        this(new ClientChatWindow(name));
+    }
+
 
     public Client(String serverIP) {
         this(serverIP, new ClientChatWindow());
@@ -190,26 +201,6 @@ public class Client {
             chatWindow.setStatus(text);
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     private class StartClient implements Runnable {

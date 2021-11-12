@@ -27,7 +27,7 @@ public class AbstractChatWindow {
     public AbstractChatWindow(String username) {
 
         this.username = username;
-
+        System.out.println(username);
         chatWindow = new JFrame(username);
         chatWindow.setLayout(new BorderLayout());
 

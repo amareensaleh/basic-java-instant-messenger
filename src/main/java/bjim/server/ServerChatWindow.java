@@ -1,8 +1,8 @@
 package bjim.server;
 
-import bjim.common.AbstractChatWindow;
+import bjim.common.AbstractChatWindownew;
 
-public class ServerChatWindow extends AbstractChatWindow {
+public class ServerChatWindow extends AbstractChatWindownew{
 
     public ServerChatWindow() {
         this("Server");

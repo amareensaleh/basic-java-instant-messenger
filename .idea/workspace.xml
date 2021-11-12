@@ -40,7 +40,7 @@
     <property name="last_opened_file_path" value="D:/d/Bandicut" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
-  <component name="RunManager" selected="Application.ServerApplication">
+  <component name="RunManager" selected="Application.ClientApplication">
     <configuration name="ClientApplication" type="Application" factoryName="Application" singleton="true" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="bjim.ClientApplication" />
       <module name="basic-java-instant-messenger" />
@@ -124,8 +124,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.ServerApplication" />
         <item itemvalue="Application.ClientApplication" />
+        <item itemvalue="Application.ServerApplication" />
         <item itemvalue="JUnit.ServerTest.server_shows_message_after_connection" />
         <item itemvalue="JUnit.ClientTest.testingtravis" />
         <item itemvalue="JUnit.ServerTest.stopServer" />

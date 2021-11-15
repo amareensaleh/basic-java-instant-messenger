@@ -12,7 +12,7 @@ import java.util.concurrent.Executors;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
-
+import java.util.*;
 
 import lombok.Getter;
 
@@ -27,10 +27,6 @@ public class AbstractChatWindownew {
     public JTextField userInput;
     public JTextArea chatText;
     public JLabel status;
-
-
-
-
 
 
     JTextField usernameChooser;
@@ -49,17 +45,18 @@ public class AbstractChatWindownew {
     private JProgressBar progressBar;
     JButton btnSend;
 
+    //distinct users
+     HashMap<String, Integer> map = new HashMap<>();
+     int count_user=1;
+
+
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Getter public  String username;
 
     public AbstractChatWindownew(String username) {
 
-
-
         this.username=username;
-
-
 
         preFrame = new JFrame("Choose your username!(Colt chat v0.1");
         preFrame.setBounds(450, 190, 1014, 597);
@@ -97,25 +94,6 @@ public class AbstractChatWindownew {
 
         enterServer.addActionListener(new AbstractChatWindownew.enterServerButtonListener());
         //preFrame.setVisible(true);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -270,13 +248,6 @@ public class AbstractChatWindownew {
         userInput.setColumns(10);
 
 
-
-
-
-
-
-
-
         //chatWindow.setVisible(false);
         if(username=="Client")
         {preFrame.setVisible(true);
@@ -294,13 +265,41 @@ public class AbstractChatWindownew {
 
     class enterServerButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent event) {
+
+            //working on protecting duplicate user
+
+             //HashMap<String, Integer> map = new HashMap<>();
+            // int count_user=1;
+
+
             username = usernameChooser.getText();
-            if (username.length() < 1) {System.out.println("No!"); }
+
+            if(map.containsKey(username))
+            {
+                System.out.println("This key contains");
+            }
+
+
+            else
+            {
+                map.put(username,count_user+1);
+            }
+
+
+            if (username.length() <= 1)
+            {System.out.println("No!"); }
+
             else {
+
+                for(String i: map.keySet())
+                {
+                    System.out.println("item"+i);
+                }
                 preFrame.setVisible(false);
                 chatWindow.setVisible(true);
-
             }
+
+
         }
 
     }
@@ -427,28 +426,9 @@ public class AbstractChatWindownew {
         userInput.setBounds(0, 5, 433, 58);
         panel_3.add(userInput);
         userInput.setColumns(10);
-
-
-
-
-
-
-
-
-
         chatWindow.setVisible(true);
 
     }
-
-
-
-
-
-
-
-
-
-
 
     private JTextArea createChatText() {
         JTextArea textArea = new JTextArea();

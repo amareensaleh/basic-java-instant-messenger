@@ -1,173 +1,145 @@
 package bjim.server;
-import bjim.client.Client;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 import static bjim.server.Server.DEFAULT_PORT;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import bjim.client.Client;
+import bjim.client.ClientChatWindow;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ServerTest {
 
-	private static final int CUSTOM_PORT = 1234;
+    private static final int WAIT_SECS = 100;
 
+    private static final int CUSTOM_PORT = 1234;
 
-	//Test by Saleh
-	@Test
-	public void startServer() throws InterruptedException {
+    final ServerChatWindow serverChatWindow = mock(ServerChatWindow.class);
 
-		// given
-		Server server = new Server();
+    Server server = new Server(serverChatWindow);
 
-		// when
-		server.startRunning();
+    @Before
+    public void setUp() throws InterruptedException {
+        server = new Server(serverChatWindow);
+        server.startRunning();
+        Thread.sleep(WAIT_SECS);
+    }
 
-		// then
-		Thread.sleep(1000);
-		assertTrue(server.isRunning());
+    @After
+    public void tearDown() {
+        server.stopRunning();
+    }
 
-		// after
-		server.stopServer();
-	}
+    @Test
+    public void startServer() {
 
-	@Test
-	public void stopServer() throws InterruptedException {
+        // then
+        assertTrue(server.isRunning());
+    }
 
-		// given
-		Server server = new Server();
-		server.startRunning();
-		Thread.sleep(1000);
+    @Test
+    public void stopServer() throws InterruptedException {
 
-		// when
-		server.stopServer();
+        // when
+        server.stopRunning();
 
-		// then
-		Thread.sleep(1000);
-		assertFalse(server.isRunning());
-	}
+        // then
+        Thread.sleep(WAIT_SECS);
+        assertFalse(server.isRunning());
+    }
 
-	@Test
-	public void serverStartsOnDefaultPort() throws InterruptedException {
+    @Test
+    public void serverStartsOnDefaultPort() {
 
-		// given
-		Server server = new Server();
+        // when..then
+        assertEquals(DEFAULT_PORT, server.getPort());
+    }
 
-		// when
-		server.startRunning();
+    @Test
+    public void serverStartsOnCustomPort() throws InterruptedException {
 
-		// then
-		Thread.sleep(1000);
-		assertEquals(DEFAULT_PORT, server.getPort());
+        // given
+        Server customServer = new Server(CUSTOM_PORT, serverChatWindow);
 
-		// after
-		server.stopServer();
-	}
+        // before
+        assertNotEquals(
+                "Precondition violated: `customPort` MUST NOT be equal to DEFAULT_PORT: "
+                        + DEFAULT_PORT,
+                DEFAULT_PORT,
+                CUSTOM_PORT);
 
+        // when
+        customServer.startRunning();
 
+        // then
+        Thread.sleep(WAIT_SECS);
+        assertEquals(CUSTOM_PORT, customServer.getPort());
 
-	@Test
-	public void serverStartsOnCustomPort() throws InterruptedException {
+        // after code
+        customServer.stopRunning();
+    }
 
-		// given
-		Server server = new Server(CUSTOM_PORT);
+    @Test
+    public void numberOfConnectedClientsIsZero() {
 
-		// before
-		assertNotEquals("Precondition violated: `customPort` MUST NOT be equal to DEFAULT_PORT: " + DEFAULT_PORT,
-				DEFAULT_PORT, CUSTOM_PORT);
+        // then
+        assertEquals(0, server.numberOfClientsConnected());
 
-		// when
-		server.startRunning();
+        // after
+        server.stopRunning();
+    }
 
-		// then
-		Thread.sleep(1000);
-		assertEquals(CUSTOM_PORT, server.getPort());
+    @Test
+    public void serverSendsAMessageAndClientReceivesIt() throws InterruptedException {
 
-		// after code
-		server.stopServer();
-	}
+        // given
+        when(serverChatWindow.getUsername()).thenReturn("Server");
+        ClientChatWindow clientChatWindow = mock(ClientChatWindow.class);
+        Client client = new Client("127.0.0.1", clientChatWindow);
+        client.startRunning();
+        Thread.sleep(WAIT_SECS);
 
+        // when
+        server.sendMessage("hi");
+        Thread.sleep(500);
 
-//Tests by Jaydeb
-	@Test
-	public void checkConnectiontrueforServer() throws InterruptedException {
+        // then
+        assertEquals("Server:\n  hi", client.getLastReceivedMessage());
 
-		// given
+        // after
+        server.stopRunning();
+        client.stopRunning();
+    }
 
-		Server server = new Server();
-		//Client cl = new Client("127.0.0.1");
+    @Test
+    public void serverUserMessageVisibleTrue() {
 
-		// when
-		server.startRunning();
-		Thread.sleep(1000);
+        // given
+        when(serverChatWindow.isUserMessageVisible()).thenReturn(true);
 
-		//then
-		assertFalse(server.connected());
+        // then
+        assertEquals(true, server.isServerMessageVisible());
 
-		//after
-		server.stopServer();
+        // after
+        server.stopRunning();
+    }
 
-	}
+    @Test
+    public void windowIsVisibleDuringWhenStartTheServer() {
 
-	@Test
-	public void serverSendsAMessageAndClientReceivesIt() throws InterruptedException {
+        // given
+        when(serverChatWindow.isVisible()).thenReturn(true);
 
-		// given
-		Server server = new Server();
-		Client client = new Client("127.0.0.1");
-		server.startRunning();
-		Thread.sleep(1000);
-		client.startRunning();
-		Thread.sleep(1000);
+        // then
+        assertEquals(true, server.isWindowVisible());
 
-		//when
-		server.sendMessage("hi");
-		Thread.sleep(500);
-
-		// then
-		assertEquals("ADMIN- hi", client.getLastReceivedMessage());
-		//after
-		server.stopServer();
-		client.stopClient();
-	}
-
-
-
-	@Test
-	public void serverUserMessageVisibleTrue() throws InterruptedException
-	{
-		// given
-		Server server = new Server();
-		server.startRunning();
-		Thread.sleep(1000);
-
-		//then
-		assertEquals(true, server.isServerMessageVisible());
-
-		//after
-		server.stopServer();
-	}
-
-
-	@Test
-	public void windowIsVisibleduringWhenstartTheServer() throws InterruptedException
-	{
-		// given
-		Server server = new Server();
-		server.startRunning();
-		Thread.sleep(1000);
-
-        //then
-		assertEquals(true, server.isWindowvisible());
-
-        //after
-		server.stopServer();
-
-	}
-
-
-
+        // after
+        server.stopRunning();
+    }
 }

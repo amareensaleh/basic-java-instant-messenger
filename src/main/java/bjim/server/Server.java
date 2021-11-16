@@ -1,273 +1,201 @@
 package bjim.server;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.EOFException;
+import bjim.common.Connection;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
-import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public class Server  {
+@RequiredArgsConstructor
+public class Server {
 
-	public static final int DEFAULT_PORT = 6789;
+    public static final int DEFAULT_PORT = 6789;
 
-	// the port where the server is listening
-	private final int port;
+    // the port where the server is listening
+    private final int port;
 
-	// the socket where the server is listening
-	private ServerSocket serverSocket;
+    // the socket where the server is listening
+    private ServerSocket serverSocket;
 
-	// the connection created once a client is accepted by the server
-	private Socket clientConnection;
+    private final ServerChatWindow chatWindow;
 
-	// client input/output channels
-	private ObjectOutputStream output;
-	private ObjectInputStream input;
+    private final List<Connection> connections = new ArrayList<>();
 
-	// Chat attributes
-	private JFrame chatWindow;
-	private JTextField userMessage;
-	private JTextArea chatBox;
+    // checking last received message from client to server
+    @Getter private String lastReceivedMessage = "";
 
+    // A single thread for the server accept loop
+    private final ExecutorService serverThreadPool = Executors.newSingleThreadExecutor();
 
-	//checking variables
+    private final ExecutorService handlerThreadPool = Executors.newFixedThreadPool(10);
 
-	public String msg;
-    public boolean connected_sr_cl=false;
+    public Server() {
+        this(DEFAULT_PORT);
+    }
 
-	public boolean windowvisible=false;
-    public boolean userMessageVisible=false;
+    public Server(int port) {
+        this(port, new ServerChatWindow());
+    }
 
+    public Server(ServerChatWindow chatWindow) {
+        this(DEFAULT_PORT, chatWindow);
+    }
 
-	//checking last received message from client to server
-	private String lastReceivedMessagetoServer = "";
+    public boolean isWindowVisible() {
+        return chatWindow.isVisible();
+    }
 
+    public boolean isServerMessageVisible() {
+        return chatWindow.isUserMessageVisible();
+    }
 
-	// A single thread for the server accept loop
-	private ExecutorService executorService = Executors.newSingleThreadExecutor();
+    public void startRunning() {
 
-	public Server() {
-		this(DEFAULT_PORT);
-	}
+        chatWindow.onSend(event -> sendMessage(event.getActionCommand()));
 
-	public Server(int port) {
-		this.port = port;
+        serverThreadPool.submit(new StartServer());
+    }
 
-		chatWindow = new JFrame("Instant Messenger");
-		userMessage = new JTextField();
-		userMessage.setEditable(false);
-		userMessage.addActionListener(new ActionListener() {
+    public synchronized void sendMessage(String message) {
 
-			public void actionPerformed(ActionEvent event) {
-				sendMessage(event.getActionCommand());
-				userMessage.setText("");
+        String messageToSend = chatWindow.getUsername() + ":\n  " + message;
 
-			}
-		});
-		chatWindow.add(userMessage, BorderLayout.NORTH);
-		chatBox = new JTextArea();
-		chatWindow.add(new JScrollPane(chatBox));
-		chatWindow.setSize(300, 180);
-		chatWindow.setVisible(true);
+        for (Connection connection : connections) {
+            try {
+                sendMessage(messageToSend, connection);
+                showMessage("\n" + messageToSend);
+            } catch (IOException ioException) {
+                chatWindow.append("\nERROR: Can't send that message");
+            }
+        }
+    }
 
-		windowvisible=chatWindow.isVisible();
-		userMessageVisible=userMessage.isVisible();
-	}
+    private void sendMessage(String messageToSend, Connection connection) throws IOException {
+        connection.getOutput().writeObject(messageToSend);
+        connection.getOutput().flush();
+    }
 
+    public void stopRunning() {
+        System.out.println("Stopping server...");
+        while (serverSocket != null && !serverSocket.isClosed()) {
+            try {
+                serverSocket.close();
+                return;
+            } catch (IOException e) {
+                System.out.println("Failed to stop server...");
+            }
+        }
+    }
 
-	//check server window is Visible
-	public boolean isWindowvisible()
-	{
-		return windowvisible;
-	}
+    public synchronized void showMessage(String text) {
+        chatWindow.showMessage(text);
+    }
 
+    public void ableToType(boolean tof) {
+        chatWindow.ableToType(tof);
+    }
 
-	//check user messagefrom server  is Visible
-	public boolean isServerMessageVisible()
-	{
-		return userMessageVisible;
-	}
+    public int getPort() {
+        return serverSocket.getLocalPort();
+    }
 
+    public boolean isRunning() {
+        if (serverSocket == null) {
+            return false;
+        }
+        return !serverSocket.isClosed();
+    }
 
-	public void startRunning() {
+    public void setDefaultCloseOperation(int exitOnClose) {
+        chatWindow.setDefaultCloseOperation(exitOnClose);
+    }
 
-		executorService.submit(new Runnable() {
+    public int numberOfClientsConnected() {
+        int count = 0;
+        for (Connection connection : connections) {
+            if (connection != null && !connection.getSocket().isClosed()) {
+                ++count;
+            }
+        }
+        return count;
+    }
 
-			@Override
-			public void run() {
-				try {
-					serverSocket = new ServerSocket(port, 100);
-					while (true) {
-						try {
-							waitForConnection();
-							setupStreams();
-							whileChatting();
-						} catch (EOFException eofException) {
-							showMessage("\n Server ended the connection!");
-						} finally {
-							closeCrap();
-						}
-					}
-				} catch (IOException ioException) {
-					ioException.printStackTrace();
-				}
+    private class StartServer implements Runnable {
 
-			}
-		});
-	}
+        @Override
+        public void run() {
+            try {
+                serverSocket = new ServerSocket(port, 100);
+                setStatus("Waiting for clients to connect!");
+                ableToType(true);
 
-	public void waitForConnection() throws IOException {
-		showMessage("Waiting for someone to connect!");
-		clientConnection = serverSocket.accept();
-		connected_sr_cl=true;
-		showMessage("\nNow connected to" + clientConnection.getInetAddress()
-				.getHostName() + " !");
+                while (true) {
+                    waitForConnection();
+                }
 
+            } catch (IOException ioException) {
+                System.out.println("Stopping server: " + ioException.getMessage());
+            } finally {
+                disconnectClients();
+            }
+        }
 
-	}
+        private void waitForConnection() throws IOException {
 
+            Connection connection = new Connection(serverSocket.accept());
+            connections.add(connection);
 
+            handlerThreadPool.submit(() -> readMessages(connection));
 
-	//check server and client are connected
+            setStatus("(" + connections.size() + ") client(s) are connected");
+        }
 
-	public boolean connected()
-	{
-		return connected_sr_cl;
-	}
-	public void setupStreams() throws IOException {
-		output = new ObjectOutputStream(clientConnection.getOutputStream());
-		output.flush();
-		input = new ObjectInputStream(clientConnection.getInputStream());
-		showMessage("\nStreams are setup! \n");
-	}
+        private void disconnectClients() {
+            showMessage("\nClosing connections\n");
+            ableToType(false);
 
+            for (Connection connection : connections) {
+                closeClientConnection(connection);
+            }
+            connections.clear();
+        }
 
-	public String servermsg="";
-	public void whileChatting() throws IOException {
-		String message = "\nYou are now connected!";
-		sendMessage(message);
-		ableToType(true);
-		do {
-			try {
-				lastReceivedMessagetoServer = String.valueOf(input.readObject());
-				//message = (String) input.readObject();
-				//showMessage("\n" + message);
-				showMessage("\n" + lastReceivedMessagetoServer);
+        private void readMessages(Connection connection) {
 
+            while (connection != null && connection.getInput() != null) {
+                try {
+                    lastReceivedMessage = String.valueOf(connection.getInput().readObject());
+                    showMessage("\n" + lastReceivedMessage);
 
-			} catch (ClassNotFoundException classNotFoundException) {
-				showMessage("\n I don't know what user send!");
-			}
-		} while (!lastReceivedMessagetoServer.equals("\nUSER-END"));
-	}
+                } catch (IOException e) {
+                    closeClientConnection(connection);
+                    setStatus("(" + connections.size() + ") client(s) are connected");
+                    break;
+                } catch (ClassNotFoundException e) {
+                    setStatus("(" + connections.size() + ") client(s) are connected");
+                }
+            }
+        }
 
-	//added to show last received message
-	public String getLastReceivedMessage() {
-		return lastReceivedMessagetoServer;
-	}
+        private void setStatus(String text) {
+            chatWindow.setStatus(text);
+        }
 
-
-
-	public String servermessagereturn()
-	{
-		return servermsg;
-	}
-
-	public void sendMessage(String message) {
-
-		try {
-			output.writeObject("ADMIN- " + message);
-			output.flush();
-			showMessage("\nADMIN- " + message);
-
-		} catch (IOException ioException) {
-			chatBox.append("\nERROR: Can't send that message");
-		}
-	}
-
-
-	public String getchatText()
-	{
-		//return chatBox.getText();
-		//return msg;
-
-		return userMessage.getText();
-	}
-
-	private void closeCrap() {
-		showMessage("\n Closing connections \n");
-		ableToType(false);
-		try {
-			if (output != null) {
-				output.close();
-			}
-			if (input != null) {
-				input.close();
-			}
-			if (clientConnection != null) {
-				clientConnection.close();
-			}
-		} catch (IOException ioException) {
-			ioException.printStackTrace();
-		}
-	}
-
-	public void stopServer() {
-		System.out.println("Stopping server...");
-		while (!serverSocket.isClosed()) {
-			try {
-				serverSocket.close();
-				return;
-			} catch (IOException e) {
-				System.out.println("Failed to stop server...");
-			}
-		}
-	}
-
-	public void showMessage(final String text) {
-		SwingUtilities.invokeLater(new Runnable() {
-
-			public void run() {
-				chatBox.append(text);
-			}
-		});
-	}
-
-
-	public  String messagefromserver()
-	{
-		return chatBox.getText();
-	}
-
-	public void ableToType(final boolean tof) {
-		SwingUtilities.invokeLater(new Runnable() {
-
-			public void run() {
-				userMessage.setEditable(tof);
-
-				//servermsg=userMessage.getText();
-			}
-		});
-	}
-
-	public int getPort() {
-		return serverSocket.getLocalPort();
-	}
-
-	public boolean isRunning() {
-		if (serverSocket == null) {
-			return false;
-		}
-		return !serverSocket.isClosed();
-	}
-
-	public void setDefaultCloseOperation(int exitOnClose) {
-		chatWindow.setDefaultCloseOperation(exitOnClose);
-	}
+        private void closeClientConnection(Connection connection) {
+            if (connection == null) {
+                return;
+            }
+            try {
+                connection.close();
+                connections.remove(connection);
+            } catch (IOException e) {
+                System.out.println(
+                        "Error while attempting to close client connection: " + e.getMessage());
+            }
+        }
+    }
 }

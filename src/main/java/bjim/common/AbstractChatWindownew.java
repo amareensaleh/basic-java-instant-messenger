@@ -44,8 +44,6 @@ public class AbstractChatWindownew {
     HashMap<String, Integer> map = new HashMap<>();
     int count_user = 1;
 
-    private ExecutorService executorService = Executors.newSingleThreadExecutor();
-
     @Getter public String username;
 
     public AbstractChatWindownew(String username) {

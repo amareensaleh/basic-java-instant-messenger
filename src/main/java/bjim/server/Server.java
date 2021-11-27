@@ -9,6 +9,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+
+import javax.swing.text.BadLocationException;
 
 @RequiredArgsConstructor
 public class Server {
@@ -25,7 +28,7 @@ public class Server {
     private final ServerChatWindow chatWindow;
 
     private final List<Connection> connections = new ArrayList<>();
-
+    String messageToSend;
     // checking last received message from client to server
     @Getter private String lastReceivedMessage = "";
 
@@ -34,11 +37,11 @@ public class Server {
 
     private final ExecutorService handlerThreadPool = Executors.newFixedThreadPool(10);
 
-    public Server() {
+    public Server() throws IOException, BadLocationException {
         this(DEFAULT_PORT);
     }
 
-    public Server(int port) {
+    public Server(int port) throws IOException, BadLocationException {
         this(port, new ServerChatWindow());
     }
 
@@ -71,13 +74,31 @@ public class Server {
 
     public synchronized void sendMessage(String message) {
 
-        String messageToSend = chatWindow.getUsername() + ":\n  " + message;
+        if(message.equals(":D"))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"sm" ;}
+
+        else   if(message.equals(":'("))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"cr" ;}
+        else   if(message.equals("<3)"))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"hr" ;}
+        else   if(message.equals(":("))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"sd" ;}
+
+        else   if(message.equals("o.O"))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"ag" ;}
+        else   if(message.equals(":'D"))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"sc" ;}
+
+
+
+
+        else {messageToSend = chatWindow.getUsername() + ":\n  " + message;}
 
         for (Connection connection : connections) {
             try {
                 sendMessage(messageToSend, connection);
                 showMessage("\n" + messageToSend);
-            } catch (IOException ioException) {
+            } catch (IOException | BadLocationException ioException) {
                 chatWindow.append("\nERROR: Can't send that message");
             }
         }
@@ -109,7 +130,7 @@ public class Server {
         }
     }
 
-    public synchronized void showMessage(String text) {
+    public synchronized void showMessage(String text) throws BadLocationException {
         chatWindow.showMessage(text);
     }
 
@@ -144,6 +165,7 @@ public class Server {
 
     private class StartServer implements Runnable {
 
+        @SneakyThrows
         @Override
         public void run() {
             try {
@@ -172,7 +194,7 @@ public class Server {
             setStatus("(" + connections.size() + ") client(s) are connected");
         }
 
-        private void disconnectClients() {
+        private void disconnectClients() throws BadLocationException {
             showMessage("\nClosing connections\n");
             ableToType(false);
 
@@ -195,6 +217,8 @@ public class Server {
                     break;
                 } catch (ClassNotFoundException e) {
                     setStatus("(" + connections.size() + ") client(s) are connected");
+                } catch (BadLocationException e) {
+                    e.printStackTrace();
                 }
             }
         }

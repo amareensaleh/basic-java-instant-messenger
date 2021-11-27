@@ -12,6 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.swing.text.BadLocationException;
+
 public class ClientTest {
 
     private static final int WAIT_SECS = 1000;
@@ -23,7 +25,7 @@ public class ClientTest {
     private Client client;
 
     @Before
-    public void setUp() throws InterruptedException {
+    public void setUp() throws InterruptedException, BadLocationException {
         server = new Server(serverChatWindow);
         server.startRunning();
         Thread.sleep(WAIT_SECS);
@@ -96,7 +98,7 @@ public class ClientTest {
     }
 
     @Test
-    public void multipleClientsConnected() throws InterruptedException {
+    public void multipleClientsConnected() throws InterruptedException, BadLocationException {
 
         // given
         Client client1 = new Client(clientChatWindow);
@@ -117,7 +119,7 @@ public class ClientTest {
     }
 
     @Test
-    public void twoClientsSendMessagesToServer() throws InterruptedException {
+    public void twoClientsSendMessagesToServer() throws InterruptedException, BadLocationException {
 
         // given
         Client client1 = new Client(clientChatWindow);
@@ -144,7 +146,7 @@ public class ClientTest {
     }
 
     @Test
-    public void serverSendsMessagesToTwoClients() throws InterruptedException {
+    public void serverSendsMessagesToTwoClients() throws InterruptedException, BadLocationException {
 
         // given
         Client client1 = new Client(clientChatWindow);
@@ -168,7 +170,7 @@ public class ClientTest {
 
     @Test
     public void ClientAppDoNotGetConnectionIfServerAppDonotStarts()
-            throws InterruptedException, IOException {
+            throws InterruptedException, IOException, BadLocationException {
 
         // given
         Client client1 = new Client(clientChatWindow);
@@ -184,7 +186,7 @@ public class ClientTest {
 
     @Test
     public void CLientCanBeAbleToTypeIfClientGetConnectionToServer()
-            throws InterruptedException, IOException {
+            throws InterruptedException, IOException, BadLocationException {
         // given
         Client client1 = new Client(clientChatWindow);
         client1.startRunning1();

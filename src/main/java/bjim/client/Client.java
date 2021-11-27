@@ -1,11 +1,12 @@
 package bjim.client;
 
 import bjim.common.Connection;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+
+import javax.swing.text.BadLocationException;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -18,40 +19,43 @@ public class Client {
     private final ClientChatWindow chatWindow;
     private final String serverIP;
     private final int serverPort = SERVER_PORT; // todo: allow setting in constructor
-    int checkstatus;
-    private Connection connection;
 
+    private Connection connection;
+    String messageToSend;
     private String lastReceivedMessage = "";
     private ObjectOutputStream output;
     private ObjectInputStream input;
     boolean type;
 
+
+
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public static Client withUsername(String username) {
+    public static Client withUsername(String username) throws IOException, BadLocationException {
         return new Client(LOCAL_HOST, username);
     }
 
-    public Client() {
+    public Client() throws IOException, BadLocationException {
         this(new ClientChatWindow());
     }
 
-    public Client(String serverIP) {
+    public Client(String serverIP) throws IOException, BadLocationException {
         this(serverIP, new ClientChatWindow());
     }
 
-    public Client(String serverIP, String username) {
+    public Client(String serverIP, String username) throws IOException, BadLocationException {
         this(serverIP, new ClientChatWindow(username));
     }
 
-    public Client(ClientChatWindow chatWindow) {
+    public Client(ClientChatWindow chatWindow) throws BadLocationException {
         this(LOCAL_HOST, chatWindow);
     }
 
-    public Client(String serverIP, ClientChatWindow chatWindow) {
+    public Client(String serverIP, ClientChatWindow chatWindow) throws BadLocationException {
         this.serverIP = serverIP;
         this.chatWindow = chatWindow;
         this.chatWindow.onSend(event -> sendMessage(event.getActionCommand()));
+
     }
 
     public boolean isWindowVisibleClientSide() {
@@ -89,12 +93,39 @@ public class Client {
     }
 
     public void sendMessage(String message) {
+        String lastfourdig=message.substring(message.length()-4);
 
-        String messageToSend = chatWindow.getUsername() + ":\n  " + message;
+
+        if(lastfourdig.equals(".txt"))
+        {
+            System.out.println("it is a text");
+        }
+
+
+        if(message.equals(":D"))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"sm" ;}
+
+        else   if(message.equals(":'("))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"cr" ;}
+        else   if(message.equals("<3)"))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"hr" ;}
+        else   if(message.equals(":("))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"sd" ;}
+
+        else   if(message.equals("o.O"))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"ag" ;}
+        else   if(message.equals(":'D"))
+        {  messageToSend = chatWindow.getUsername() + ":\n  "+"sc" ;}
+
+
+
+
+
+        else {messageToSend = chatWindow.getUsername() + ":\n  " + message;}
         try {
             sendMessage(messageToSend, connection);
             showMessage("\n" + messageToSend);
-        } catch (IOException ioException) {
+        } catch (IOException | BadLocationException ioException) {
             chatWindow.append("\nSomething is messed up!");
         }
     }
@@ -104,7 +135,7 @@ public class Client {
         connection.getOutput().flush();
     }
 
-    private void showMessage(final String m) {
+    private void showMessage(final String m) throws BadLocationException {
         chatWindow.showMessage(m);
     }
 
@@ -127,8 +158,9 @@ public class Client {
             try {
                 connectToServer();
                 setupStreams();
+
                 whileChatting();
-            } catch (IOException eofException) {
+            } catch (IOException | BadLocationException eofException) {
                 setStatus(CONNECTION_CLOSED);
             } finally {
                 disconnect();
@@ -141,21 +173,22 @@ public class Client {
             setStatus("Connected to server @" + serverIP + ":" + serverPort);
         }
 
-        private void setupStreams() throws IOException {
+
+        private void setupStreams() throws IOException, BadLocationException {
             output = new ObjectOutputStream(connection.getSocket().getOutputStream());
             output.flush();
             input = new ObjectInputStream(connection.getSocket().getInputStream());
             showMessage("\nStreams are now good to go!");
         }
 
-        private void whileChatting() throws IOException {
+        private void whileChatting() throws IOException, BadLocationException {
             ableToType(true);
             do {
                 try {
                     lastReceivedMessage = String.valueOf(connection.getInput().readObject());
                     showMessage("\n" + lastReceivedMessage);
 
-                } catch (ClassNotFoundException classNotFoundException) {
+                } catch (ClassNotFoundException | BadLocationException classNotFoundException) {
                     showMessage("\nDont know ObjectType!");
                 }
             } while (!lastReceivedMessage.equals("\nADMIN - END"));
@@ -191,7 +224,7 @@ public class Client {
                 connectToServer();
 
                 whileChatting();
-            } catch (IOException eofException) {
+            } catch (IOException | BadLocationException eofException) {
                 setStatus(CONNECTION_CLOSED);
             } finally {
                 disconnect();
@@ -204,21 +237,21 @@ public class Client {
             setStatus("Connected to server @" + serverIP + ":" + serverPort);
         }
 
-        private void setupStreams() throws IOException {
+        private void setupStreams() throws IOException, BadLocationException {
             output = new ObjectOutputStream(connection.getOutput());
             output.flush();
             input = new ObjectInputStream(connection.getInput());
             showMessage("\nStreams are now good to go!");
         }
 
-        private void whileChatting() throws IOException {
+        private void whileChatting() throws IOException, BadLocationException {
             ableToType(true);
             do {
                 try {
                     lastReceivedMessage = String.valueOf(connection.getInput().readObject());
                     showMessage("\n" + lastReceivedMessage);
 
-                } catch (ClassNotFoundException classNotFoundException) {
+                } catch (ClassNotFoundException | BadLocationException classNotFoundException) {
                     showMessage("\nDont know ObjectType!");
                 }
             } while (!lastReceivedMessage.equals("\nADMIN - END"));

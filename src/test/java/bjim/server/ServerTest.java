@@ -12,6 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.swing.text.BadLocationException;
+
 public class ServerTest {
 
     private static final int WAIT_SECS = 100;
@@ -93,7 +95,7 @@ public class ServerTest {
     }
 
     @Test
-    public void serverSendsAMessageAndClientReceivesIt() throws InterruptedException {
+    public void serverSendsAMessageAndClientReceivesIt() throws InterruptedException, BadLocationException {
 
         // given
         when(serverChatWindow.getUsername()).thenReturn("Server");

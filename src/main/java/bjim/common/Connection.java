@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @Getter
 public class Connection {
-
+    int a;
     private final Socket socket;
     private final ObjectOutputStream output;
     private final ObjectInputStream input;

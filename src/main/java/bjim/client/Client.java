@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.Value;
 
 public class Client {
-
+    int a; //added a new variable
     private static final int SERVER_PORT = 6789;
     private static final int serverPort = SERVER_PORT; // todo: allow setting in constructor
     public static final String LOCAL_HOST = "127.0.0.1";
@@ -24,6 +24,8 @@ public class Client {
 
     private final String serverIP;
     private Connection connection;
+
+    private connection_button;
 
     private String lastReceivedMessage = "";
 

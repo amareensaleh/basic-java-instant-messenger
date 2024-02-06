@@ -10,6 +10,9 @@ public class ClientApplication {
 
     public static void main(String[] args) {
 
+       int a;
+       int b;
+
         UsernameWindow usernameWindow = new UsernameWindow();
 
         usernameWindow.setActionListener(
